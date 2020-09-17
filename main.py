@@ -1,11 +1,4 @@
 #ELEMENTAL PACK GENERATOR PROTOTYPE
-mode = input("Press ENTER to continue OR type adv to launch advanced mode(WIP)")
-if mode == "adv":
-    print("Launching Advanced Mode...")
-    adv = True
-else:
-    print("Initialzing Elemental Pack Generator...")
-    adv = False
 print("Loading - Modules(0/4)")
 import time as t
 starttime = t.time()
