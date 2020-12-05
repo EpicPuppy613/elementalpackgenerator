@@ -12,6 +12,7 @@ elements = []
 formulas = []
 colors = {}
 categories = []
+current_id = 0
 hex_list = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"]
 alphanum = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"]
 print("Loading - Varaiables(2/4)")
@@ -44,7 +45,7 @@ def addcat():
             else:
                 print("Making catagory " + cat_name + " with color #" + cat_color)
                 return({"name":cat_name, "color":cat_color})
-def addelem():
+def addelem(element_id):
     if len(categories) == 0:
         print("Oops! You don't have any categories made yet! You should do that first.")
         raise(Exception("No Categories"))
@@ -66,8 +67,8 @@ def addelem():
             else:
                 break
         elem_name = input("What do you want to name your element?")
-        print("Added Element: "+elem_name+" in category: "+categories[elem_cat]["name"])
-        return({"name": elem_name, "category": categories[elem_cat]["name"]})
+        print("Added Element: "+elem_name+" in category: "+categories[elem_cat]["name"]+" with id "+str(element_id))
+        return({"name": elem_name, "category": categories[elem_cat]["name"], "id": element_id})
 def export():
     while True:
         pack_folder = input("What do you want to name the folder that the pack is stored in? (Can only contain alpha-numeric characters)")
@@ -82,41 +83,65 @@ def export():
             print("Oops! Not a valid folder name!")
             continue
         else:
-            pack_name = input("What do you want to name your pack?")
-            pack_desc = input("What do you want the description of your pack to be?")
-            pack_author = input("What is the name of the author that made the pack?")
-            print("Exporting - Creating Folder (0/4)")
-            try:
-                o.mkdir("C:\Elemental Pack Generator")
-            except:
-                print("", end="")
-            try:
-                o.mkdir("C:\Elemental Pack Generator\\"+pack_folder)
-            except:
-                print("", end="")
-            t.sleep(0.1)
-            print("Exporting - Exporting Pack Info (1/4)")
-            pack = open("C:\Elemental Pack Generator\\"+pack_folder+"\pack.json", "w")
-            pack.write('{'+'"name": "' + pack_name + '",'+'"description": "' + pack_desc + '",'+'"author": "' + pack_author + '"'+'}')
-            pack.close()
-            print("Exporting - Exporting Categories (2/4)")
-            if len(categories) != 0:
-                pack = open("C:\Elemental Pack Generator\\"+pack_folder+"\categories.json", "w")
-                pack.write(j.dumps(categories))
-                pack.close()
-                t.sleep(0.1)
-            print("Exporting - Exporting Elements (3/4)")
-            if len(elements) != 0:
-                pack = open("C:\Elemental Pack Generator\\"+pack_folder+"\elems.json", "w")
-                pack.write(j.dumps(elements))
-                pack.close()
-                t.sleep(0.1)
-            print("Exporting - Exporting Formulas (4/4)")
-            if len(formulas) != 0:
-                pack = open("C:\Elemental Pack Generator\\"+pack_folder+"\\formulas.json", "w")
-                pack.write(j.dumps(formulas))
-                pack.close()
-                t.sleep(0.1)
+            while True:
+                print("What game do you want to export to?\n[0]Ledom Elemental 4\n[1]Elemental Lite")
+                try:
+                    exportgame = int(str(input(">")))
+                except:
+                    print("Oops! Not a valid number.")
+                    continue
+                if exportgame == 0: 
+                    pack_name = input("What do you want to name your pack?")
+                    pack_desc = input("What do you want the description of your pack to be?")
+                    pack_author = input("What is the name of the author that made the pack?")
+                    pack_export = {"schema_rev": 1,"type": "pack","pack": {"name": pack_name, "description": pack_desc, "author": pack_author},"elems": elements,"formulas": formulas,"categories": categories}
+                    print("Exporting - Creating Folder")
+                    try:
+                        o.mkdir("C:\Elemental Pack Generator")
+                    except:
+                        print("", end="")
+                    try:
+                        o.mkdir("C:\Elemental Pack Generator\\"+pack_folder)
+                    except:
+                        print("", end="")
+                    print("Exporting - Pack")
+                    pack = open("C:\Elemental Pack Generator\\"+pack_folder+"\pack.json","w")
+                    pack.write(j.dumps(pack_export))
+                    pack.close()
+                    break
+                elif exportgame == 1:
+                    pack_name = input("What do you want to name your pack?")
+                    print("Exporting - Creating Folder (0/4)")
+                    try:
+                        o.mkdir("C:\Elemental Pack Generator")
+                    except:
+                        print("", end="")
+                    try:
+                        o.mkdir("C:\Elemental Pack Generator\\"+pack_folder)
+                    except:
+                        print("", end="")
+                    t.sleep(0.1)
+                    print("Exporting - Exporting Pack Info (1/4)")
+                    pack = open("C:\Elemental Pack Generator\\"+pack_folder+"\pack.txt", "w")
+                    pack.write('Title='+pack_name+'\n\n')
+                    print("Exporting - Exporting Categories (2/4)")
+                    if len(categories) != 0:
+                        for i in categories:
+                            pack.write('')
+                        t.sleep(0.1)
+                    print("Exporting - Exporting Elements (3/4)")
+                    if len(elements) != 0:
+                        pack = open("C:\Elemental Pack Generator\\"+pack_folder+"\elems.json", "w")
+                        pack.write(j.dumps(elements))
+                        pack.close()
+                        t.sleep(0.1)
+                    print("Exporting - Exporting Formulas (4/4)")
+                    if len(formulas) != 0:
+                        pack = open("C:\Elemental Pack Generator\\"+pack_folder+"\\formulas.json", "w")
+                        pack.write(j.dumps(formulas))
+                        pack.close()
+                        t.sleep(0.1)
+                    break
             print("Done! Exported under C:\Elemental Pack Generator\[Your Pack Name]")
             break
 def addform():
@@ -135,10 +160,8 @@ def addform():
         else:
             print("Oops! Not a valid amount!")
     for i in range(0, input_count):
-        y = 0
         for x in elements:
-            print("["+str(y)+"]"+x["name"])
-            y += 1
+            print("["+str(x["id"])+"]"+x["name"])
         while True:
             try:
                 input_choice = int(float(input("What element do you want to add to the formula?")))
@@ -146,12 +169,10 @@ def addform():
                 print("Oops! Not a valid number!")
                 continue
             if input_choice >= 0 and input_choice < len(elements):
-                inputs.append(elements[input_choice]["name"])
+                inputs.append(input_choice)
                 break
-    y = 0
     for x in elements:
-        print("["+str(y)+"]"+x["name"])
-        y += 1
+        print("["+str(x["id"])+"]"+x["name"])
     while True:
         try:
             output_choice = int(float(input("What element do you want as a output?")))
@@ -159,9 +180,9 @@ def addform():
             print("Oops! Not a valid number!")
             continue
         if output_choice >= 0 and output_choice < len(elements):
-            output = elements[output_choice]["name"]
+            output = output_choice
             break
-    print("Creating formula with inputs: "+str(inputs)+" and output: "+output)
+    print("Creating formula with inputs: "+str(inputs)+" and output: "+str(output))
     return({"inputs": inputs, "output": output})
 endtime = t.time()
 loadtime = endtime - starttime
@@ -181,7 +202,8 @@ while True:
         print(categories)
     elif choice == 1:
         try:
-            elements.append(addelem())
+            elements.append(addelem(current_id))
+            current_id += 1
         except Exception:
             print("Please use '0' to create a category.")
         print(elements)
